@@ -228,6 +228,7 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
 
   // Sidebar current view state ('list' | 'route')
   const [sidebarState, setSidebarState] = useState<'list' | 'route'>('list');
+  const [hoveredStationId, setHoveredStationId] = useState<string | null>(null);
 
   // Mobile Bottom Sheet expand state
   const [isSheetExpanded, setIsSheetExpanded] = useState<boolean>(false);
@@ -291,14 +292,15 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
 
     // 2. Plot Charging Stations (Rotated orange squares with bolt)
     stations.forEach(station => {
+      const isHovered = hoveredStationId === station.station_id;
       const stationIcon = L.divIcon({
         className: 'custom-station-icon',
         html: `
-          <div class="relative flex flex-col items-center">
-            <div class="bg-[#161416] border border-[#ea580c] w-7 h-7 rotate-45 flex items-center justify-center shadow-[0_0_8px_rgba(234,88,12,0.4)]">
-              <span class="material-symbols-outlined text-[#ea580c] text-[14px] -rotate-45" style="font-variation-settings: 'FILL' 1;">bolt</span>
+          <div class="relative flex flex-col items-center transition-all duration-200 ${isHovered ? 'scale-125 z-[1000]' : ''}">
+            <div class="bg-[#161416] border ${isHovered ? 'border-white shadow-[0_0_15px_rgba(255,255,255,0.6)]' : 'border-[#ea580c] shadow-[0_0_8px_rgba(234,88,12,0.4)]'} w-7 h-7 rotate-45 flex items-center justify-center transition-colors">
+              <span class="material-symbols-outlined ${isHovered ? 'text-white' : 'text-[#ea580c]'} text-[14px] -rotate-45 transition-colors" style="font-variation-settings: 'FILL' 1;">bolt</span>
             </div>
-            <div class="w-0.5 h-2 bg-[#ea580c]/50"></div>
+            <div class="w-0.5 h-2 ${isHovered ? 'bg-white' : 'bg-[#ea580c]/50'} transition-colors"></div>
           </div>
         `,
         iconSize: [32, 32],
@@ -399,7 +401,7 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
   // Sync markers when stations list or points list change
   useEffect(() => {
     updateMapMarkers();
-  }, [stations, startPoint, endPoint]);
+  }, [stations, startPoint, endPoint, hoveredStationId]);
 
   // Calculate Routing using local Valhalla docker routing container
   const calculateRoute = async () => {
@@ -674,10 +676,10 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
                   onStartNavigation(plan, routeCoords);
                 }
               }}
-              className="w-full bg-indigo-500 text-slate-950 h-14 rounded-full flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(234,88,12,0.4)] active:scale-95 transition-transform"
+              className="w-full bg-indigo-600 text-white h-16 rounded-full flex items-center justify-center gap-3 shadow-[0_0_25px_rgba(234,88,12,0.5)] active:scale-95 transition-all border-2 border-indigo-400/20"
             >
-              <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>navigation</span>
-              <span className="text-xs font-bold uppercase tracking-widest font-mono">Start Live Navigation</span>
+              <Compass className="w-6 h-6 animate-pulse" />
+              <span className="text-sm font-black uppercase tracking-widest">Start Live Navigation</span>
             </button>
           </div>
         )}
@@ -738,7 +740,7 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
           <div className="flex bg-slate-950 rounded-xl p-1 border border-slate-800">
             <button
               onClick={() => setSidebarState('list')}
-              className={`flex-grow py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer ${
+              className={`flex-grow py-2 text-[10px] font-bold tracking-widest rounded-lg transition-all cursor-pointer ${
                 sidebarState === 'list' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -746,7 +748,7 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
             </button>
             <button
               onClick={() => setSidebarState('route')}
-              className={`flex-grow py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer ${
+              className={`flex-grow py-2 text-[10px] font-bold tracking-widest rounded-lg transition-all cursor-pointer ${
                 sidebarState === 'route' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -793,7 +795,14 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
                 <div className="py-8 text-center text-xs text-slate-500">No stations found nearby.</div>
               ) : (
                 filteredStations.map(station => (
-                  <div key={station.station_id} className="glass-panel p-4 rounded-xl space-y-3 hover:border-[#ea580c]/60 transition-colors cursor-pointer">
+                  <div
+                    key={station.station_id}
+                    onMouseEnter={() => setHoveredStationId(station.station_id)}
+                    onMouseLeave={() => setHoveredStationId(null)}
+                    className={`glass-panel p-4 rounded-xl space-y-3 transition-all cursor-pointer border-l-4 ${
+                      hoveredStationId === station.station_id ? 'border-l-indigo-500 bg-indigo-500/5 border-orange-500/30' : 'border-l-transparent'
+                    }`}
+                  >
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="text-sm font-bold text-white leading-tight">{station.name}</h3>
@@ -900,9 +909,9 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
                           };
                           onStartNavigation(plan, routeCoords);
                         }}
-                        className="w-full bg-indigo-500 text-slate-950 py-3.5 rounded-xl font-bold text-xs uppercase tracking-widest flex justify-center items-center gap-2 shadow-lg hover:bg-indigo-400 transition-all active:scale-[0.98] cursor-pointer"
+                        className="w-full bg-indigo-600 text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest flex justify-center items-center gap-2 shadow-xl hover:bg-indigo-500 transition-all active:scale-[0.98] cursor-pointer"
                       >
-                        <span className="material-symbols-outlined font-bold">navigation</span>
+                        <Compass className="w-4 h-4" />
                         <span>Start Live Navigation</span>
                       </button>
                     )}

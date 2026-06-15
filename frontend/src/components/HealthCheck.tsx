@@ -26,7 +26,7 @@ export const HealthCheck: React.FC = () => {
       setError(null);
       
       setHistory(prev => [
-        { time: new Date().toLocaleTimeString(), ok: true, latency },
+        { time: new Date().toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 }), ok: true, latency },
         ...prev.slice(0, 9)
       ]);
     } catch (err: any) {
@@ -35,7 +35,7 @@ export const HealthCheck: React.FC = () => {
       setError(err.response?.data?.detail || 'Could not reach backend health check endpoint');
       setHealth(null);
       setHistory(prev => [
-        { time: new Date().toLocaleTimeString(), ok: false, latency },
+        { time: new Date().toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 }), ok: false, latency },
         ...prev.slice(0, 9)
       ]);
     } finally {
