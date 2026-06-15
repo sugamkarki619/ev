@@ -1,0 +1,23 @@
+# Monorepo Root Dockerignore
+.git/
+.github/
+.vscode/
+.idea/
+.env
+.env.*
+postgres_data/
+*.log
+
+# Backend subfolders
+backend/__pycache__/
+backend/*.py[cod]
+backend/.venv/
+backend/venv/
+backend/.pytest_cache/
+
+# Frontend subfolders
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/build/
+frontend/.eslintcache

@@ -1,0 +1,53 @@
+# Environment variables (Crucial for security)
+.env
+.env.*
+!.env.example
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Node / Frontend build files
+node_modules/
+dist/
+dist-ssr/
+build/
+.eslintcache
+*.local
+
+# Database files
+*.db
+*.sqlite
+postgres_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+db.crypt
+
+# Editor configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
