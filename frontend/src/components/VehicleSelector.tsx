@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { apiClient } from '../api/client';
-import { Car, Battery, Info, Plus, AlertTriangle } from 'lucide-react';
+import { Car, Battery, Plus, AlertTriangle } from 'lucide-react';
 
 interface CatalogModel {
   model_id: string;
@@ -179,18 +179,21 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({ onVehicleSelec
   }
 
   return (
-    <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-xl text-white">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[10px] font-black text-indigo-500/80 uppercase tracking-[0.2em] flex items-center gap-2">
-          <Car className="w-4 h-4" />
-          My EV Configuration
-        </h2>
+    <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-8 shadow-xl text-white">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-[10px] font-black text-indigo-500 uppercase tracking-[0.3em] flex items-center gap-2 mb-1">
+            <Car className="w-4 h-4" />
+            Vehicle Fleet
+          </h2>
+          <p className="text-slate-400 text-xs font-medium">Manage your active electric vehicles</p>
+        </div>
         {!registering && (
           <button
             onClick={() => setRegistering(true)}
-            className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center gap-1 transition-all cursor-pointer"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-indigo-900/20 active:scale-95"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-4 h-4" />
             Add Vehicle
           </button>
         )}
@@ -204,16 +207,16 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({ onVehicleSelec
       )}
 
       {registering ? (
-        <form onSubmit={handleRegisterVehicle} className="space-y-4 bg-slate-950/60 p-4 rounded-xl border border-slate-850">
+        <form onSubmit={handleRegisterVehicle} className="space-y-6 bg-slate-950/60 p-6 rounded-3xl border border-slate-850">
           <div>
-            <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Select Model</label>
+            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Select Model</label>
             <select
               required
               value={selectedCatalogId}
               onChange={(e) => setSelectedCatalogId(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-indigo-500 cursor-pointer transition-colors appearance-none"
             >
-              <option value="">-- Choose Catalog Model --</option>
+              <option value="">Choose Catalog Model</option>
               {catalog.map(cat => (
                 <option key={cat.model_id} value={cat.model_id}>
                   {cat.brand} {cat.model_name} ({cat.battery_capacity_kwh} kWh)
@@ -222,19 +225,19 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({ onVehicleSelec
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">License Plate</label>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">License Plate</label>
               <input
                 type="text"
-                placeholder="FL 2419"
+                placeholder="ABC-1234"
                 value={licensePlate}
                 onChange={(e) => setLicensePlate(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-indigo-500 placeholder:text-slate-600"
               />
             </div>
             <div>
-              <label className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Battery SoC (%)</label>
+              <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-2">Battery SoC (%)</label>
               <input
                 type="number"
                 min={0}
@@ -242,100 +245,132 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({ onVehicleSelec
                 required
                 value={initialBattery}
                 onChange={(e) => setInitialBattery(parseInt(e.target.value) || 0)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2 px-3 text-xs text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-sm text-white focus:outline-none focus:border-indigo-500"
               />
             </div>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-3 pt-2">
             <button
               type="submit"
-              className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+              className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition-all cursor-pointer active:scale-95"
             >
-              Register
+              Register Vehicle
             </button>
             <button
               type="button"
               onClick={() => setRegistering(false)}
-              className="flex-1 py-2 bg-slate-905 border border-slate-800 hover:bg-slate-900 text-slate-300 rounded-lg text-xs font-bold transition-all cursor-pointer"
+              className="flex-1 py-3 bg-slate-800 border border-slate-700 hover:bg-slate-750 text-slate-300 rounded-xl text-xs font-black transition-all cursor-pointer"
             >
               Cancel
             </button>
           </div>
         </form>
       ) : vehicles.length === 0 ? (
-        <div className="text-center py-6 bg-slate-950/40 border border-dashed border-slate-800 rounded-xl">
-          <Info className="w-8 h-8 text-slate-600 mx-auto mb-2" />
-          <p className="text-xs text-slate-500">No vehicles registered yet. Add your vehicle to begin dynamic trip energy calculations.</p>
+        <div className="text-center py-12 bg-slate-950/40 border-2 border-dashed border-slate-800 rounded-3xl">
+          <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-800">
+            <Car className="w-8 h-8 text-slate-600" />
+          </div>
+          <p className="text-sm text-slate-400 font-medium px-8">No vehicles registered yet. Add your vehicle to begin dynamic trip energy calculations.</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {vehicles.map(vehicle => (
             <div
               key={vehicle.user_vehicle_id}
-              className={`p-4 rounded-xl border transition-all ${
+              className={`p-6 rounded-3xl border transition-all relative overflow-hidden group ${
                 vehicle.is_active 
-                  ? 'bg-indigo-950/20 border-indigo-500/50 shadow-md' 
-                  : 'bg-slate-950/40 border-slate-850 opacity-60 hover:opacity-90'
+                  ? 'bg-gradient-to-br from-indigo-950/30 to-slate-900/50 border-indigo-500/40 shadow-xl ring-1 ring-indigo-500/20'
+                  : 'bg-slate-950/40 border-slate-850 hover:bg-slate-900/60 hover:border-slate-700'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${vehicle.is_active ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-800 text-slate-400'}`}>
-                    <Car className="w-5 h-5" />
+              <div className="flex items-start justify-between relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-2xl ${vehicle.is_active ? 'bg-indigo-500/20 text-indigo-400 shadow-inner shadow-indigo-500/10' : 'bg-slate-800 text-slate-500'}`}>
+                    <Car className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xs font-bold text-white flex items-center gap-1.5">
-                      {vehicle.catalog_model?.brand} {vehicle.catalog_model?.model_name}
-                      {vehicle.license_plate && (
-                        <span className="text-[9px] bg-slate-800 border border-slate-700 text-slate-400 px-1 rounded font-normal">
-                          {vehicle.license_plate}
-                        </span>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-black text-white tracking-tight">
+                        {vehicle.catalog_model?.model_name}
+                      </h3>
+                      {vehicle.is_active && (
+                        <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
                       )}
-                    </h3>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      Drag Coeff: {vehicle.catalog_model?.base_drag_coefficient} | Max Cap: {vehicle.catalog_model?.battery_capacity_kwh} kWh
+                    </div>
+                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      {vehicle.catalog_model?.brand}
+                      {vehicle.license_plate && ` • ${vehicle.license_plate}`}
                     </p>
                   </div>
                 </div>
 
-                {!vehicle.is_active && (
+                {!vehicle.is_active ? (
                   <button
                     onClick={() => handleSelectActive(vehicle.user_vehicle_id)}
                     disabled={savingId !== null}
-                    className="py-1 px-2.5 bg-slate-800 hover:bg-slate-750 text-[10px] font-bold text-slate-300 rounded-lg cursor-pointer transition-all"
+                    className="py-1.5 px-4 bg-slate-800 hover:bg-indigo-600 text-[10px] font-black text-white rounded-xl cursor-pointer transition-all active:scale-95 shadow-lg border border-slate-700 hover:border-indigo-500"
                   >
-                    Select
+                    ACTIVATE
                   </button>
+                ) : (
+                  <div className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-[8px] font-black px-2 py-1 rounded-lg uppercase tracking-widest">
+                    Primary
+                  </div>
                 )}
               </div>
 
-              {/* Slider for Current Battery Percent */}
-              {vehicle.is_active && (
-                <div className="mt-4 pt-3 border-t border-indigo-950/40">
-                  <div className="flex justify-between items-center text-xs mb-1.5">
-                    <span className="text-slate-400 flex items-center gap-1">
-                      <Battery className="w-4 h-4 text-emerald-400" /> Battery SoC
-                    </span>
+              {/* Enhanced Slider for Current Battery Percent */}
+              <div className={`mt-8 transition-all duration-500 ${vehicle.is_active ? 'opacity-100 translate-y-0' : 'opacity-30 pointer-events-none'}`}>
+                <div className="flex justify-between items-end mb-3">
+                  <div>
+                    <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Battery Level</div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[9px] font-bold text-indigo-500 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase tracking-tighter">Simulation Mode</span>
-                      <span className="font-bold text-emerald-400">{vehicle.current_battery_percent}%</span>
+                      <Battery className={`w-4 h-4 ${vehicle.current_battery_percent > 20 ? 'text-emerald-400' : 'text-rose-500'}`} />
+                      <span className={`text-2xl font-black tracking-tighter ${vehicle.current_battery_percent > 20 ? 'text-white' : 'text-rose-500'}`}>
+                        {vehicle.current_battery_percent}%
+                      </span>
                     </div>
                   </div>
+                  <div className="text-right">
+                    <div className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Capacity</div>
+                    <div className="text-sm font-black text-slate-300">{vehicle.catalog_model?.battery_capacity_kwh} <span className="text-[10px] text-slate-500">kWh</span></div>
+                  </div>
+                </div>
+
+                <div className="relative group/slider">
                   <input
                     type="range"
                     min="0"
                     max="100"
                     value={vehicle.current_battery_percent}
                     onChange={(e) => handleBatteryChange(vehicle.user_vehicle_id, parseInt(e.target.value))}
-                    className="battery-slider w-full cursor-pointer"
+                    disabled={!vehicle.is_active}
+                    className="battery-slider w-full cursor-pointer relative z-10"
                   />
-                  <div className="flex justify-between text-[8px] text-slate-500 mt-1 font-semibold">
-                    <span>EMPTY</span>
-                    <span>100% CHARGED</span>
+                  {/* Progress track overlay for visual flair */}
+                  <div
+                    className="absolute top-[21px] left-0 h-1.5 bg-indigo-500 rounded-full pointer-events-none transition-all duration-300"
+                    style={{ width: `${vehicle.current_battery_percent}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between mt-3 px-1">
+                  <div className="flex flex-col">
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Status</span>
+                    <span className="text-[10px] font-bold text-slate-400">
+                      {vehicle.current_battery_percent < 20 ? 'Critical' : vehicle.current_battery_percent < 50 ? 'Medium' : 'Optimal'}
+                    </span>
+                  </div>
+                  <div className="flex flex-col text-right">
+                    <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Degradation</span>
+                    <span className="text-[10px] font-bold text-slate-400">{((1 - vehicle.battery_degradation_factor) * 100).toFixed(1)}%</span>
                   </div>
                 </div>
-              )}
+              </div>
+
+              {/* Subtle background decoration */}
+              <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none" />
             </div>
           ))}
         </div>
