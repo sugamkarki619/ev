@@ -896,40 +896,37 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ activeVehicle, onStart
       <aside className="hidden md:flex w-[360px] h-full flex-col bg-slate-900 border-l border-slate-800 z-40 overflow-hidden shrink-0">
         
         {/* Sidebar Header: Analytics */}
-        <div className="p-4 border-b border-slate-800 space-y-4 shrink-0">
-          <div className="flex justify-between items-start">
-            <div>
-              <h2 className="text-lg font-bold text-indigo-500">Trip Analytics</h2>
-              <p className="text-xs text-slate-400">Optimal Efficiency Route</p>
-            </div>
+        <div className="p-5 border-b border-slate-800 space-y-6 shrink-0 bg-gradient-to-b from-indigo-950/20 to-transparent">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-black text-white tracking-tight">Trip Analytics</h2>
             {planResult && (
-              <div className="text-right">
-                <div className="text-base font-black text-[#ffc640] font-mono">
+              <div className="flex flex-col items-end">
+                <div className={`px-2 py-1 rounded-lg font-mono font-black text-sm transition-colors ${planResult.recommended_stop && planResult.recommended_stop.charge_cost_coins > 0 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-slate-800 text-slate-400'}`}>
                   {planResult.recommended_stop ? planResult.recommended_stop.charge_cost_coins.toFixed(1) : "0.0"} Coins
                 </div>
-                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Est. Cost</div>
+                <div className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1">Est. Cost</div>
               </div>
             )}
           </div>
 
           {planResult ? (
-            <div className="grid grid-cols-3 gap-2">
-              <div className="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800/50 text-center">
-                <div className="text-[9px] text-slate-500 font-bold uppercase tracking-wider font-mono">Distance</div>
-                <div className="font-bold text-white text-xs mt-0.5">{planResult.distance_km.toFixed(0)} km</div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50 text-center shadow-inner">
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest font-mono">Distance</div>
+                <div className="text-xl font-black text-white mt-1">{planResult.distance_km.toFixed(0)}<span className="text-[10px] font-bold ml-0.5">km</span></div>
               </div>
-              <div className="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800/50 text-center">
-                <div className="text-[9px] text-slate-500 font-bold uppercase tracking-wider font-mono">Time</div>
-                <div className="font-bold text-white text-xs mt-0.5">{Math.floor(planResult.duration_mins / 60)}h {planResult.duration_mins % 60}m</div>
+              <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50 text-center shadow-inner">
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest font-mono">Time</div>
+                <div className="text-xl font-black text-white mt-1">{Math.floor(planResult.duration_mins / 60)}<span className="text-[10px] font-bold">h</span>{planResult.duration_mins % 60}<span className="text-[10px] font-bold">m</span></div>
               </div>
-              <div className="bg-slate-800/40 p-2.5 rounded-xl border border-slate-800/50 text-center">
-                <div className="text-[9px] text-slate-500 font-bold uppercase tracking-wider font-mono">Arr. SOC</div>
-                <div className="font-bold text-white text-xs mt-0.5 text-emerald-500">{planResult.end_soc}%</div>
+              <div className="bg-slate-800/60 p-3 rounded-2xl border border-slate-700/50 text-center shadow-inner">
+                <div className="text-[9px] text-slate-400 font-bold uppercase tracking-widest font-mono">Arrival</div>
+                <div className="text-xl font-black text-emerald-400 mt-1">{planResult.end_soc}<span className="text-[10px] font-bold ml-0.5">%</span></div>
               </div>
             </div>
           ) : (
-            <div className="py-4 text-center text-xs text-slate-500">
-              Select points and active vehicle to generate estimates...
+            <div className="py-8 text-center text-xs text-slate-500 bg-slate-950/40 rounded-2xl border border-dashed border-slate-800">
+              Select waypoints to compute paths...
             </div>
           )}
         </div>
@@ -1185,10 +1182,10 @@ export const TripPlanner: React.FC<TripPlannerProps> = ({ activeVehicle, onStart
           <div className="p-4 bg-slate-900 border-t border-slate-800 space-y-3 shrink-0">
             <button
               onClick={() => onStartNavigation(planResult, decodePolyline6(planResult.polyline))}
-              className="w-full bg-indigo-500 text-slate-950 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-indigo-950/20 active:scale-[0.98] transition-all cursor-pointer"
+              className="w-full bg-indigo-600 text-white font-black py-4 rounded-xl flex items-center justify-center gap-3 shadow-xl shadow-indigo-950/40 active:scale-[0.98] transition-all cursor-pointer border border-indigo-400/20"
             >
-              <span className="material-symbols-outlined">navigation</span>
-              <span>Start Live Navigation</span>
+              <Navigation className="w-5 h-5 fill-current" />
+              <span className="uppercase tracking-widest text-sm">Start Live Navigation</span>
             </button>
             <button
               onClick={handleSaveTrip}
