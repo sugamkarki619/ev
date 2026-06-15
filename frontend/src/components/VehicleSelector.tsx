@@ -181,8 +181,8 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({ onVehicleSelec
   return (
     <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-xl text-white">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold flex items-center gap-2">
-          <Car className="w-5 h-5 text-indigo-400" />
+        <h2 className="text-[10px] font-black text-indigo-500/80 uppercase tracking-[0.2em] flex items-center gap-2">
+          <Car className="w-4 h-4" />
           My EV Configuration
         </h2>
         {!registering && (
@@ -317,7 +317,10 @@ export const VehicleSelector: React.FC<VehicleSelectorProps> = ({ onVehicleSelec
                     <span className="text-slate-400 flex items-center gap-1">
                       <Battery className="w-4 h-4 text-emerald-400" /> Battery SoC
                     </span>
-                    <span className="font-bold text-emerald-400">{vehicle.current_battery_percent}%</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-bold text-indigo-500 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase tracking-tighter">Simulation Mode</span>
+                      <span className="font-bold text-emerald-400">{vehicle.current_battery_percent}%</span>
+                    </div>
                   </div>
                   <input
                     type="range"

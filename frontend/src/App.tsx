@@ -6,7 +6,7 @@ import { NavigationMap } from './components/NavigationMap';
 import { TripPlanner } from './components/TripPlanner';
 import { LiveNavigationScreen } from './components/LiveNavigationScreen';
 import { apiClient, handleLogout } from './api/client';
-import { LogOut, User as UserIcon, Cpu, Layers, ShieldCheck, Mail, Save, Wallet as WalletIcon, Coins, ShieldAlert, Award, RefreshCw, Database, LayoutDashboard, MapPin, Compass } from 'lucide-react';
+import { LogOut, User as UserIcon, Cpu, Layers, ShieldCheck, Mail, Save, Wallet as WalletIcon, Coins, ShieldAlert, Award, RefreshCw, Database, LayoutDashboard, MapPin, Compass, Plus } from 'lucide-react';
 
 interface User {
   user_id: string;
@@ -121,6 +121,9 @@ function App() {
   };
 
   const handleRunSeeding = async () => {
+    if (!window.confirm("Are you sure you want to seed demo data? This will overwrite or supplement existing database records.")) {
+      return;
+    }
     setSeeding(true);
     setSeedStatus(null);
     try {
@@ -347,6 +350,28 @@ function App() {
               {/* Health Check Diagnostics */}
               <HealthCheck />
 
+              {/* Quick Access Card */}
+              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-xl text-xs space-y-4">
+                <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-indigo-400" />
+                  Stack Endpoints Reference
+                </h2>
+                <div className="space-y-2.5">
+                  <div className="flex justify-between py-1.5 border-b border-slate-900">
+                    <span className="text-slate-500 font-medium">Swagger API Docs</span>
+                    <a href="http://192.168.254.53:8000/docs" target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline font-bold">192.168.254.53:8000/docs</a>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-slate-900">
+                    <span className="text-slate-500 font-medium">Health Status Endpoint</span>
+                    <a href="http://192.168.254.53:8000/api/v1/health" target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline font-bold">/api/v1/health</a>
+                  </div>
+                  <div className="flex justify-between py-1.5 border-b border-slate-900">
+                    <span className="text-slate-500 font-medium">React App Local Dev</span>
+                    <span className="text-slate-300 font-bold">{window.location.host}</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
             {/* Right Column: User Profile, Wallets, and Vehicle Configuration */}
@@ -358,30 +383,41 @@ function App() {
                   <WalletIcon className="w-24 h-24" />
                 </div>
 
-                <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <Coins className="w-4 h-4 text-indigo-400" />
+                <h2 className="text-[10px] font-black text-indigo-500/80 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                  <Coins className="w-4 h-4" />
                   Digital Token Wallet
                 </h2>
 
                 {loadingWallet ? (
                   <div className="py-4 text-center text-slate-500 animate-pulse text-xs">Fetching tokens...</div>
                 ) : wallet ? (
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-3xl font-black text-white tracking-tight flex items-baseline gap-1">
-                        {wallet.balance_coins.toFixed(2)}
-                        <span className="text-xs text-indigo-400 font-bold uppercase tracking-wider">{wallet.currency_code}</span>
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-4xl font-black text-white tracking-tight flex items-baseline gap-1">
+                          {wallet.balance_coins.toFixed(2)}
+                          <span className="text-sm text-indigo-400 font-bold uppercase tracking-wider">{wallet.currency_code}</span>
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold tracking-tight">
+                          Available Credits
+                        </p>
                       </div>
-                      <p className="text-[10px] text-slate-500 mt-2">
-                        Top-up balance allocated for charging reservations.
-                      </p>
+                      <button
+                        onClick={fetchUserWallet}
+                        className="p-2 bg-slate-900 border border-slate-800 hover:bg-slate-850 rounded-xl transition-all text-slate-400 hover:text-white cursor-pointer shadow-lg"
+                      >
+                        <RefreshCw className="w-4 h-4" />
+                      </button>
                     </div>
-                    <button
-                      onClick={fetchUserWallet}
-                      className="p-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-850 rounded-lg transition-all text-slate-400 hover:text-white cursor-pointer"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                    </button>
+
+                    <div className="flex items-center gap-3">
+                      <button className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-950/40 flex items-center justify-center gap-1.5 cursor-pointer">
+                        <Plus className="w-3.5 h-3.5" /> Add Funds
+                      </button>
+                      <button className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        History
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="py-2 text-xs text-slate-500">Wallet context unavailable. Reload.</div>
@@ -393,8 +429,8 @@ function App() {
 
               {/* Profile Details Panel */}
               <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-xl">
-                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <UserIcon className="w-5 h-5 text-indigo-400" />
+                <h2 className="text-[10px] font-black text-indigo-500/80 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                  <UserIcon className="w-4 h-4" />
                   Account Settings
                 </h2>
 
@@ -521,28 +557,6 @@ function App() {
                     )}
                   </div>
                 )}
-              </div>
-
-              {/* Quick Access Card */}
-              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-xl text-xs space-y-4">
-                <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-indigo-400" />
-                  Stack Endpoints Reference
-                </h2>
-                <div className="space-y-2.5">
-                  <div className="flex justify-between py-1.5 border-b border-slate-900">
-                    <span className="text-slate-500 font-medium">Swagger API Docs</span>
-                    <a href="http://192.168.254.53:8000/docs" target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline font-bold">192.168.254.53:8000/docs</a>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-900">
-                    <span className="text-slate-500 font-medium">Health Status Endpoint</span>
-                    <a href="http://192.168.254.53:8000/api/v1/health" target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline font-bold">/api/v1/health</a>
-                  </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-900">
-                    <span className="text-slate-500 font-medium">React App Local Dev</span>
-                    <span className="text-slate-300 font-bold">{window.location.host}</span>
-                  </div>
-                </div>
               </div>
 
             </div>
