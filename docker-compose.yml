@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgis/postgis:15-3.3-alpine
-    container_name: scaling-octo-waffle-db
+    container_name: EV-db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -24,7 +24,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: scaling-octo-waffle-backend
+    container_name: EV-backend
     environment:
       - POSTGRES_SERVER=db
       - POSTGRES_USER=${POSTGRES_USER:-postgres}
@@ -53,7 +53,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: builder
-    container_name: scaling-octo-waffle-frontend
+    container_name: EV-frontend
     environment:
       - VITE_API_URL=${VITE_API_URL:-http://localhost:8000/api/v1}
       - VITE_VALHALLA_URL=${VITE_VALHALLA_URL:-http://localhost:8002}
@@ -70,7 +70,7 @@ services:
 
   valhalla:
     image: ghcr.io/gis-ops/docker-valhalla/valhalla:latest
-    container_name: scaling-octo-waffle-valhalla
+    container_name: EV-valhalla
     ports:
       - "8002:8002"
     environment:
