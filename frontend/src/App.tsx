@@ -6,7 +6,7 @@ import { NavigationMap } from './components/NavigationMap';
 import { TripPlanner } from './components/TripPlanner';
 import { LiveNavigationScreen } from './components/LiveNavigationScreen';
 import { apiClient, handleLogout } from './api/client';
-import { LogOut, User as UserIcon, Cpu, Layers, ShieldCheck, Mail, Save, Wallet as WalletIcon, Coins, ShieldAlert, Award, RefreshCw, Database, LayoutDashboard, MapPin, Compass, Plus } from 'lucide-react';
+import { LogOut, User as UserIcon, Cpu, Layers, ShieldCheck, Mail, Save, Wallet as WalletIcon, Coins, ShieldAlert, Award, RefreshCw, Database, LayoutDashboard, MapPin, Compass } from 'lucide-react';
 
 interface User {
   user_id: string;
@@ -222,73 +222,76 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans h-screen overflow-hidden">
       {/* Header Navigation */}
-      <header className={`border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 px-6 py-3 flex items-center justify-between h-16 shrink-0 ${
+      <header className={`border-b border-slate-900/50 bg-slate-950/60 backdrop-blur-xl sticky top-0 z-50 px-8 py-4 flex items-center justify-between h-20 shrink-0 ${
         currentPage !== 'dashboard' ? 'hidden md:flex' : 'flex'
       }`}>
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-indigo-500 flex items-center justify-center">
-            <span className="material-symbols-outlined text-indigo-500 font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>electric_car</span>
+        <div className="flex items-center gap-4">
+          <div className="p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl text-indigo-500 flex items-center justify-center shadow-inner">
+            <span className="material-symbols-outlined text-indigo-500 font-black text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>electric_car</span>
           </div>
-          <div>
-            <h1 className="text-xl font-black text-white leading-none m-0 tracking-tight">
+          <div className="hidden sm:block">
+            <h1 className="text-2xl font-black text-white leading-none m-0 tracking-tighter">
               Volt<span className="text-indigo-500">Route</span>
             </h1>
-            <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest font-mono">Navigation Portal</span>
+            <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.4em]">Intelligence</span>
           </div>
         </div>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1.5 bg-slate-900/40 border border-slate-850 p-1 rounded-xl">
+        {/* Desktop Navigation Links - More Spacing, Modern Look */}
+        <nav className="hidden md:flex items-center gap-2 bg-slate-900/30 border border-slate-800/50 p-1.5 rounded-2xl shadow-inner">
           <button
             onClick={() => setCurrentPage('dashboard')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${currentPage === 'dashboard'
-                ? 'bg-indigo-650 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 tracking-tight ${currentPage === 'dashboard'
+                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/20'
+                : 'text-slate-500 hover:text-slate-200 hover:bg-slate-800/40'
               }`}
           >
-            <LayoutDashboard className="w-3.5 h-3.5" />
+            <LayoutDashboard className="w-4 h-4" />
             Dashboard
           </button>
           <button
             onClick={() => setCurrentPage('station-search')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${currentPage === 'station-search'
-                ? 'bg-indigo-650 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 tracking-tight ${currentPage === 'station-search'
+                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/20'
+                : 'text-slate-500 hover:text-slate-200 hover:bg-slate-800/40'
               }`}
           >
-            <MapPin className="w-3.5 h-3.5" />
-            Station Search
+            <MapPin className="w-4 h-4" />
+            Stations
           </button>
           <button
             onClick={() => setCurrentPage('trip-planner')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${currentPage === 'trip-planner'
-                ? 'bg-indigo-650 text-white shadow-md'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+            className={`px-5 py-2 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-2 tracking-tight ${currentPage === 'trip-planner'
+                ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/20'
+                : 'text-slate-500 hover:text-slate-200 hover:bg-slate-800/40'
               }`}
           >
-            <Compass className="w-3.5 h-3.5" />
-            Trip Planner
+            <Compass className="w-4 h-4" />
+            Planner
           </button>
         </nav>
 
         {user && (
           <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2.5 bg-slate-900/50 border border-slate-800/80 py-1.5 px-3 rounded-xl text-xs">
-              <UserIcon className="w-4 h-4 text-indigo-400" />
-              <span className="font-semibold text-slate-300">
-                {user.first_name} {user.last_name}
-              </span>
-              <span className="bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 font-bold px-1.5 py-0.2 rounded text-[9px] uppercase tracking-wide">
-                {formatRole(user.role)}
-              </span>
+            <div className="hidden lg:flex items-center gap-3 bg-slate-900/40 border border-slate-800/50 py-2 px-4 rounded-2xl text-xs transition-colors hover:border-slate-700">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-black text-[10px] shadow-lg">
+                {user.first_name.charAt(0)}
+              </div>
+              <div>
+                <div className="font-black text-slate-200 tracking-tight leading-none mb-0.5">
+                  {user.first_name} {user.last_name}
+                </div>
+                <div className="text-[9px] font-black text-indigo-500 uppercase tracking-widest opacity-80">
+                  {formatRole(user.role)}
+                </div>
+              </div>
             </div>
 
             <button
               onClick={logout}
-              className="p-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:scale-105 active:scale-95 border border-rose-500/20 rounded-xl transition-all cursor-pointer flex items-center gap-2 text-xs font-bold"
+              className="p-3 bg-slate-900 hover:bg-rose-950/30 text-slate-400 hover:text-rose-400 border border-slate-800 hover:border-rose-900/50 rounded-2xl transition-all cursor-pointer active:scale-95 shadow-lg group"
             >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Sign Out</span>
+              <LogOut className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>
         )}
@@ -304,131 +307,126 @@ function App() {
           <div className="max-w-7xl w-full mx-auto p-6 pb-20 md:pb-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {/* Left Column: Welcomes, Health */}
+            {/* Left Column: Primary Focus - Vehicle & Wallet */}
             <div className="lg:col-span-2 space-y-6">
 
-              {/* Welcome Panel */}
-              <div className="bg-gradient-to-r from-slate-900 via-indigo-950/20 to-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
-                <div className="absolute right-0 bottom-0 top-0 w-[40%] bg-gradient-to-l from-indigo-500/5 to-transparent pointer-events-none" />
+              {/* Enhanced Welcome Panel */}
+              <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/30 border border-slate-800 rounded-3xl p-8 relative overflow-hidden shadow-2xl">
+                <div className="absolute right-[-5%] top-[-10%] w-[40%] h-[120%] bg-indigo-500/10 blur-[100px] pointer-events-none rotate-12" />
 
-                <div className="flex justify-between items-start gap-4 flex-wrap">
-                  <div>
-                    <h2 className="text-2xl font-black text-white">
-                      Welcome back, {user?.first_name || 'Developer'}!
-                    </h2>
-                    <p className="text-slate-400 text-sm mt-1 max-w-xl">
-                      Your session is authenticated. Seed database stations and compute your geographic paths using the navigation planner.
-                    </p>
+                <div className="relative z-10">
+                  <div className="flex justify-between items-start gap-6 flex-wrap">
+                    <div className="max-w-xl">
+                      <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+                        Hello, {user?.first_name || 'Driver'}
+                      </h2>
+                      <p className="text-slate-400 text-base mt-2 leading-relaxed">
+                        Ready for your next journey? Manage your electric vehicles and plan optimal routes with real-time charging insights.
+                      </p>
+                      {seedStatus && (
+                        <div className="mt-4 p-3 bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-400 rounded-xl inline-block">
+                          {seedStatus}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={handleRunSeeding}
+                        disabled={seeding}
+                        className="py-2.5 px-4 bg-slate-800 hover:bg-slate-750 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+                      >
+                        <Database className={`w-4 h-4 ${seeding ? 'animate-spin' : ''}`} />
+                        Sync Demo Data
+                      </button>
+                    </div>
                   </div>
 
-                  <button
-                    onClick={handleRunSeeding}
-                    disabled={seeding}
-                    className="py-2 px-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:pointer-events-none rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-950/40"
-                  >
-                    <Database className={`w-4 h-4 ${seeding ? 'animate-spin' : ''}`} />
-                    {seeding ? 'Seeding...' : 'Seed Demo Data'}
-                  </button>
-                </div>
-
-                {seedStatus && (
-                  <div className="mt-4 p-3 bg-slate-950/60 border border-slate-800 text-[11px] font-semibold text-slate-300 rounded-xl">
-                    {seedStatus}
-                  </div>
-                )}
-
-                <div className="flex gap-4 mt-6 flex-wrap">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-950/40 px-3 py-1.5 rounded-lg border border-slate-900">
-                    <Cpu className="w-4 h-4 text-indigo-400" /> Valhalla 3.4
-                  </div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-950/40 px-3 py-1.5 rounded-lg border border-slate-900">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" /> PostGIS Point Index
+                  <div className="flex gap-4 mt-8 flex-wrap">
+                    <button
+                      onClick={() => setCurrentPage('trip-planner')}
+                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-sm font-black transition-all shadow-lg shadow-indigo-900/20 flex items-center gap-2 group"
+                    >
+                      <Compass className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                      Plan New Trip
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage('station-search')}
+                      className="px-6 py-3 bg-slate-800 hover:bg-slate-750 text-white rounded-2xl text-sm font-black transition-all flex items-center gap-2 border border-slate-700"
+                    >
+                      <MapPin className="w-5 h-5" />
+                      Find Stations
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Health Check Diagnostics */}
-              <HealthCheck />
+              {/* Main Column Priority: Vehicle Management */}
+              <VehicleSelector onVehicleSelected={setActiveVehicle} />
 
-              {/* Quick Access Card */}
-              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-xl text-xs space-y-4">
-                <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-indigo-400" />
-                  Stack Endpoints Reference
-                </h2>
-                <div className="space-y-2.5">
-                  <div className="flex justify-between py-1.5 border-b border-slate-900">
-                    <span className="text-slate-500 font-medium">Swagger API Docs</span>
-                    <a href="http://192.168.254.53:8000/docs" target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline font-bold">192.168.254.53:8000/docs</a>
+              {/* Horizontal Stats/Wallet Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Refined Wallet Card */}
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
+                  <div className="absolute -right-4 -bottom-4 opacity-5 text-indigo-400 group-hover:scale-110 transition-transform duration-500">
+                    <WalletIcon className="w-32 h-32" />
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-900">
-                    <span className="text-slate-500 font-medium">Health Status Endpoint</span>
-                    <a href="http://192.168.254.53:8000/api/v1/health" target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline font-bold">/api/v1/health</a>
+
+                  <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                    <Coins className="w-4 h-4 text-indigo-500" />
+                    Wallet Balance
+                  </h2>
+
+                  {loadingWallet ? (
+                    <div className="py-4 animate-pulse bg-slate-800/50 rounded-xl h-24" />
+                  ) : wallet ? (
+                    <div className="flex flex-col justify-between h-full min-h-[120px]">
+                      <div>
+                        <div className="text-5xl font-black text-white tracking-tighter flex items-baseline gap-2">
+                          {wallet.balance_coins.toFixed(2)}
+                          <span className="text-lg text-indigo-500 font-black uppercase">{wallet.currency_code}</span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-2 font-medium">Credits ready for fast-charging</p>
+                      </div>
+
+                      <div className="flex gap-2 mt-6">
+                        <button className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer">
+                          Add Funds
+                        </button>
+                        <button className="p-2 bg-slate-800 border border-slate-700 hover:bg-slate-750 rounded-xl transition-all text-slate-300 cursor-pointer">
+                          <RefreshCw className="w-4 h-4" onClick={fetchUserWallet} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+
+                {/* Quick Info / Tips */}
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-center">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
+                      <ShieldCheck className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white text-lg leading-tight">Optimization Active</h3>
+                      <p className="text-slate-400 text-xs mt-1 leading-relaxed">
+                        Your aerodynamic rating is being calculated using the latest Valhalla 3.4 routing engine benchmarks.
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex justify-between py-1.5 border-b border-slate-900">
-                    <span className="text-slate-500 font-medium">React App Local Dev</span>
-                    <span className="text-slate-300 font-bold">{window.location.host}</span>
+                  <div className="mt-6 flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-950/50 p-3 rounded-2xl border border-slate-900">
+                    <Cpu className="w-4 h-4 text-indigo-500" /> PostGIS spatial indexing enabled
                   </div>
                 </div>
               </div>
 
             </div>
 
-            {/* Right Column: User Profile, Wallets, and Vehicle Configuration */}
+            {/* Right Column: Profile & Secondary Info */}
             <div className="space-y-6">
 
-              {/* Wallet Dashboard Widget */}
-              <div className="bg-gradient-to-br from-indigo-950/40 to-slate-900/60 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-5 text-indigo-400">
-                  <WalletIcon className="w-24 h-24" />
-                </div>
-
-                <h2 className="text-[10px] font-black text-indigo-500/80 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                  <Coins className="w-4 h-4" />
-                  Digital Token Wallet
-                </h2>
-
-                {loadingWallet ? (
-                  <div className="py-4 text-center text-slate-500 animate-pulse text-xs">Fetching tokens...</div>
-                ) : wallet ? (
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="text-4xl font-black text-white tracking-tight flex items-baseline gap-1">
-                          {wallet.balance_coins.toFixed(2)}
-                          <span className="text-sm text-indigo-400 font-bold uppercase tracking-wider">{wallet.currency_code}</span>
-                        </div>
-                        <p className="text-[10px] text-slate-500 mt-1 uppercase font-bold tracking-tight">
-                          Available Credits
-                        </p>
-                      </div>
-                      <button
-                        onClick={fetchUserWallet}
-                        className="p-2 bg-slate-900 border border-slate-800 hover:bg-slate-850 rounded-xl transition-all text-slate-400 hover:text-white cursor-pointer shadow-lg"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <button className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-950/40 flex items-center justify-center gap-1.5 cursor-pointer">
-                        <Plus className="w-3.5 h-3.5" /> Add Funds
-                      </button>
-                      <button className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-850 text-slate-300 border border-slate-800 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer">
-                        History
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="py-2 text-xs text-slate-500">Wallet context unavailable. Reload.</div>
-                )}
-              </div>
-
-              {/* Vehicle Selector Panel */}
-              <VehicleSelector onVehicleSelected={setActiveVehicle} />
-
               {/* Profile Details Panel */}
-              <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 shadow-xl">
+              <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl">
                 <h2 className="text-[10px] font-black text-indigo-500/80 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                   <UserIcon className="w-4 h-4" />
                   Account Settings
@@ -512,51 +510,71 @@ function App() {
                         </div>
                       </form>
                     ) : (
-                      <div className="space-y-3 bg-slate-950/60 p-4 rounded-xl border border-slate-850">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black">
+                      <div className="space-y-4 bg-slate-950/60 p-6 rounded-3xl border border-slate-850 shadow-inner">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-black text-xl shadow-xl">
                             {user.first_name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="font-bold text-sm text-white">{user.first_name} {user.last_name}</div>
-                            <div className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                              <Mail className="w-3 h-3 text-slate-500" />
+                            <div className="font-black text-lg text-white tracking-tight leading-none mb-1">{user.first_name} {user.last_name}</div>
+                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                              <Mail className="w-3 h-3" />
                               {user.email}
                             </div>
                           </div>
                         </div>
 
-                        <div className="pt-2 border-t border-slate-900 text-xs space-y-1.5 text-slate-400">
-                          <div className="flex justify-between">
-                            <span>Identity Verification (KYC)</span>
+                        <div className="pt-4 border-t border-slate-900/50 text-[10px] font-black space-y-2.5 text-slate-500 uppercase tracking-widest">
+                          <div className="flex justify-between items-center">
+                            <span>KYC Status</span>
                             {user.is_kyc_verified ? (
-                              <span className="text-emerald-400 font-bold flex items-center gap-1">
-                                <Award className="w-3.5 h-3.5" /> Verified
+                              <span className="text-emerald-500 flex items-center gap-1 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-500/20">
+                                <Award className="w-3 h-3" /> Verified
                               </span>
                             ) : (
-                              <span className="text-amber-500 font-bold flex items-center gap-1">
-                                <ShieldAlert className="w-3.5 h-3.5" /> Pending Verification
+                              <span className="text-amber-500 flex items-center gap-1 bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/20">
+                                <ShieldAlert className="w-3 h-3" /> Pending
                               </span>
                             )}
                           </div>
                           {user.phone_number && (
-                            <div className="flex justify-between">
-                              <span>Phone Number</span>
-                              <span className="text-slate-300 font-semibold">{user.phone_number}</span>
+                            <div className="flex justify-between items-center">
+                              <span>Phone</span>
+                              <span className="text-slate-300 normal-case font-bold text-xs">{user.phone_number}</span>
                             </div>
                           )}
                         </div>
 
                         <button
                           onClick={() => setEditMode(true)}
-                          className="w-full mt-2 py-2 bg-slate-900 hover:bg-slate-850 text-slate-300 hover:text-white border border-slate-800 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+                          className="w-full mt-2 py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all cursor-pointer shadow-lg active:scale-[0.98]"
                         >
-                          Edit Profile
+                          Modify Profile
                         </button>
                       </div>
                     )}
                   </div>
                 )}
+              </div>
+
+              {/* Health Check Diagnostics - Compact in Sidebar */}
+              <HealthCheck />
+
+              {/* Quick Access Card - Streamlined */}
+              <div className="bg-slate-950/40 border border-slate-900 rounded-3xl p-6 text-xs space-y-4">
+                <h2 className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] flex items-center gap-2">
+                  Developer Console
+                </h2>
+                <div className="space-y-1">
+                  <a href="http://192.168.254.53:8000/docs" target="_blank" rel="noreferrer" className="flex justify-between p-2 rounded-xl hover:bg-slate-900 transition-colors group">
+                    <span className="text-slate-500 font-semibold group-hover:text-slate-300">API Documentation</span>
+                    <span className="text-indigo-500 group-hover:underline">Open</span>
+                  </a>
+                  <a href="http://192.168.254.53:8000/api/v1/health" target="_blank" rel="noreferrer" className="flex justify-between p-2 rounded-xl hover:bg-slate-900 transition-colors group">
+                    <span className="text-slate-500 font-semibold group-hover:text-slate-300">Health Endpoint</span>
+                    <span className="text-indigo-500 group-hover:underline">View</span>
+                  </a>
+                </div>
               </div>
 
             </div>

@@ -50,77 +50,67 @@ export const HealthCheck: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-2xl p-6 shadow-xl text-white">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-indigo-400">
-          <Activity className="w-5 h-5 animate-pulse text-indigo-400" />
-          System Health Monitor
+    <div className="bg-slate-950/20 border border-slate-900 rounded-3xl p-6 text-white shadow-lg">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] flex items-center gap-2">
+          <Activity className="w-3 h-3 text-emerald-500" />
+          System Status
         </h2>
-        <button
-          onClick={checkHealth}
-          disabled={loading}
-          className="p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800/40 hover:scale-105 active:scale-95 transition-all text-sm flex items-center gap-1 font-semibold cursor-pointer"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          {loading && <RefreshCw className="w-3 h-3 animate-spin text-slate-600" />}
+          <div className={`w-1.5 h-1.5 rounded-full ${error ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'}`} />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {/* API Server Card */}
-        <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center gap-4">
-          <div className={`p-3 rounded-lg ${error ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
-            <Server className="w-6 h-6" />
+      <div className="space-y-3 mb-6">
+        {/* API Server Row */}
+        <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-900/40 border border-slate-800/50">
+          <div className="flex items-center gap-3">
+            <Server className={`w-4 h-4 ${error ? 'text-rose-500' : 'text-slate-400'}`} />
+            <span className="text-[10px] font-bold text-slate-300">Backend API</span>
           </div>
-          <div>
-            <div className="text-xs text-slate-400 font-medium">FASTAPI BACKEND</div>
-            <div className="font-bold text-lg flex items-center gap-2 mt-0.5">
-              {error ? 'Offline' : 'Online'}
-              <span className={`w-2.5 h-2.5 rounded-full inline-block ${error ? 'bg-rose-500 animate-ping' : 'bg-emerald-500 animate-pulse'}`} />
+          <div className="text-right">
+            <div className={`text-[10px] font-black uppercase ${error ? 'text-rose-500' : 'text-emerald-500'}`}>
+              {error ? 'Offline' : 'Operational'}
             </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {error ? 'Service connection failed' : `Latency: ${health?.latency || 0}ms`}
-            </div>
+            {!error && <div className="text-[8px] font-bold text-slate-600 tracking-tighter">{health?.latency || 0}ms</div>}
           </div>
         </div>
 
-        {/* Database Card */}
-        <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center gap-4">
-          <div className={`p-3 rounded-lg ${error || health?.database !== 'connected' ? 'bg-rose-500/10 text-rose-400' : 'bg-indigo-500/10 text-indigo-400'}`}>
-            <Database className="w-6 h-6" />
+        {/* Database Row */}
+        <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-900/40 border border-slate-800/50">
+          <div className="flex items-center gap-3">
+            <Database className={`w-4 h-4 ${error || health?.database !== 'connected' ? 'text-rose-500' : 'text-slate-400'}`} />
+            <span className="text-[10px] font-bold text-slate-300">PostgreSQL</span>
           </div>
-          <div>
-            <div className="text-xs text-slate-400 font-medium">POSTGRESQL DB</div>
-            <div className="font-bold text-lg flex items-center gap-2 mt-0.5">
-              {error ? 'Unknown' : health?.database === 'connected' ? 'Connected' : 'Disconnected'}
-              <span className={`w-2.5 h-2.5 rounded-full inline-block ${error || health?.database !== 'connected' ? 'bg-rose-500 animate-ping' : 'bg-indigo-500 animate-pulse'}`} />
+          <div className="text-right">
+            <div className={`text-[10px] font-black uppercase ${error || health?.database !== 'connected' ? 'text-rose-500' : 'text-emerald-500'}`}>
+              {error ? 'Unreachable' : health?.database === 'connected' ? 'Connected' : 'Disconnected'}
             </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {error ? 'Database host unreachable' : 'Pool connections active'}
-            </div>
+            <div className="text-[8px] font-bold text-slate-600 tracking-tighter">Active Pool</div>
           </div>
         </div>
       </div>
 
-      {/* Diagnostics Panel */}
-      <div className="border border-slate-800 bg-slate-950/40 rounded-xl p-4">
+      {/* Compact Diagnostics Log */}
+      <div className="bg-slate-950/60 rounded-2xl p-4 border border-slate-900">
         <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
           Connection Log History
         </div>
         
         {loading && history.length === 0 ? (
-          <div className="py-4 text-center text-slate-500 text-sm animate-pulse">Running diagnostic check...</div>
+          <div className="py-4 text-center text-slate-500 text-[10px] animate-pulse uppercase font-black">Scanning...</div>
         ) : (
-          <div className="space-y-2 max-h-36 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800">
+          <div className="space-y-1 max-h-24 overflow-y-auto no-scrollbar">
             {history.map((log, i) => (
-              <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-900/60 last:border-0">
-                <span className="text-slate-500">{log.time}</span>
+              <div key={i} className="flex items-center justify-between py-1 border-b border-slate-900/40 last:border-0">
+                <span className="text-[9px] font-bold text-slate-600">{log.time.split(',')[0]}</span>
                 <span className="flex items-center gap-2">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${log.ok ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                    {log.ok ? 'PING OK' : 'FAILED'}
+                  <span className={`text-[8px] font-black tracking-tighter ${log.ok ? 'text-emerald-500/60' : 'text-rose-500/60'}`}>
+                    {log.ok ? 'SUCCESS' : 'ERR'}
                   </span>
-                  <span className="text-slate-400 w-12 text-right">{log.latency}ms</span>
+                  <span className="text-[9px] font-black text-slate-500 w-10 text-right">{log.latency}ms</span>
                 </span>
               </div>
             ))}
