@@ -3,6 +3,38 @@ import { useState, useEffect, useRef } from 'react';
 // --- GEOSPATIAL MATH HELPERS ---
 
 /**
+ * Decode Valhalla's polyline6 format
+ */
+export function decodePolyline6(str: string): [number, number][] {
+  let index = 0, lat = 0, lng = 0, coordinates: [number, number][] = [];
+  const factor = 1e6;
+
+  while (index < str.length) {
+    let byte, shift = 0, result = 0;
+    do {
+      byte = str.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      byte = str.charCodeAt(index++) - 63;
+      result |= (byte & 0x1f) << shift;
+      shift += 5;
+    } while (byte >= 0x20);
+    let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lng += dlng;
+
+    coordinates.push([lat / factor, lng / factor]);
+  }
+  return coordinates;
+}
+
+/**
  * Calculates bearing between two coordinates in degrees (0-360)
  */
 export function calculateBearing(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -134,10 +166,12 @@ export function useSmoothGPS({
   const [coords, setCoords] = useState<[number, number]>(
     routeCoords.length > 0 ? [routeCoords[0][0], routeCoords[0][1]] : [47.1415, 9.5215]
   );
+  const [rerouteTrigger, setRerouteTrigger] = useState<number>(0);
   const [bearing, setBearing] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(0);
   const [accuracy, setAccuracy] = useState<number>(0);
   const [offRoute, setOffRoute] = useState<boolean>(false);
+  const offRouteTimerRef = useRef<number | null>(null);
   const [distanceRemainingMeters, setDistanceRemainingMeters] = useState<number>(0);
   const [nextManeuverIndex, setNextManeuverIndex] = useState<number>(0);
 
@@ -397,8 +431,23 @@ export function useSmoothGPS({
       if (routeCoords.length >= 2) {
         const snapResult = snapToRoute(rawLat, rawLon, routeCoords);
         if (snapResult) {
-          const isOff = snapResult.distanceMeters > 50; // Off route threshold: 50m
+          const isOff = snapResult.distanceMeters > 40; // Off route threshold: 40m
           setOffRoute(isOff);
+
+          // Handle Reroute Trigger (Persistent off-route for 6 seconds)
+          if (isOff) {
+            if (offRouteTimerRef.current === null) {
+              offRouteTimerRef.current = window.setTimeout(() => {
+                setRerouteTrigger(prev => prev + 1);
+                offRouteTimerRef.current = null;
+              }, 6000);
+            }
+          } else {
+            if (offRouteTimerRef.current !== null) {
+              clearTimeout(offRouteTimerRef.current);
+              offRouteTimerRef.current = null;
+            }
+          }
 
           if (!isOff) {
             targetPosRef.current = [snapResult.snappedLat, snapResult.snappedLon];
@@ -574,6 +623,7 @@ export function useSmoothGPS({
     speed,
     accuracy,
     offRoute,
+    rerouteTrigger,
     distanceRemainingMeters,
     totalDistanceMeters: totalRouteDistanceRef.current,
     nextManeuverIndex,

@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
-import { useSmoothGPS, calculateBearing, getDistanceMeters } from '../hooks/useSmoothGPS';
+import axios from 'axios';
+import { useSmoothGPS, calculateBearing, getDistanceMeters, decodePolyline6 } from '../hooks/useSmoothGPS';
 import {
   Navigation, Compass, AlertTriangle, Play, Pause,
-  X, Map as MapIcon, Zap
+  X, Map as MapIcon, Zap, Bike, Car as CarIcon
 } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -124,12 +125,17 @@ export const LiveNavigationScreen: React.FC<LiveNavigationScreenProps> = ({
   const [simSpeed, setSimSpeed] = useState<number>(60); // km/h for simulation
 
   // 1. Initialize custom hook
+  const [currentRoute, setCurrentRoute] = useState<[number, number][]>(routeCoords);
+  const [currentPlan, setCurrentPlan] = useState<TripPlanResponse>(planResult);
+  const [isRerouting, setIsRerouting] = useState(false);
+
   const {
     coords,
     bearing,
     speed,
     accuracy,
     offRoute,
+    rerouteTrigger,
     distanceRemainingMeters,
     totalDistanceMeters,
     nextManeuverIndex,
@@ -143,10 +149,59 @@ export const LiveNavigationScreen: React.FC<LiveNavigationScreenProps> = ({
     compassPermission,
     requestCompassPermission
   } = useSmoothGPS({
-    routeCoords,
+    routeCoords: currentRoute,
     isActive: true,
     simulatedSpeedKmh: simSpeed
   });
+
+  // Rerouting Logic Implementation
+  const performReroute = useCallback(async () => {
+    if (isSimulating || isRerouting) return;
+
+    setIsRerouting(true);
+    console.log("Rerouting triggered...");
+
+    try {
+      const destination = routeCoords[routeCoords.length - 1];
+      const payload = {
+        locations: [
+          { lat: coords[0], lon: coords[1], type: "break" },
+          { lat: destination[0], lon: destination[1], type: "break" }
+        ],
+        costing: "auto",
+        directions_options: { units: "kilometers" }
+      };
+
+      const valhallaUrl = import.meta.env.VITE_VALHALLA_URL || 'http://192.168.254.53:8002';
+      const response = await axios.get(`${valhallaUrl}/route`, {
+        params: { json: JSON.stringify(payload) }
+      });
+
+      const trip = response.data.trip;
+      const leg = trip.legs[0];
+      const newCoords = decodePolyline6(leg.shape);
+
+      setCurrentRoute(newCoords);
+      // Update plan metrics for HUD
+      setCurrentPlan(prev => ({
+        ...prev,
+        polyline: leg.shape,
+        distance_km: trip.summary.length,
+        duration_mins: Math.round(trip.summary.time / 60)
+      }));
+    } catch (err) {
+      console.error("Rerouting failed:", err);
+    } finally {
+      setIsRerouting(false);
+    }
+  }, [coords, routeCoords, isSimulating, isRerouting]);
+
+  useEffect(() => {
+    if (rerouteTrigger > 0) {
+      performReroute();
+    }
+  }, [rerouteTrigger, performReroute]);
+
 
   // 2. Automatically guide the camera viewport for 3D navigation perspective
   useEffect(() => {
@@ -177,35 +232,37 @@ export const LiveNavigationScreen: React.FC<LiveNavigationScreenProps> = ({
 
   // Remaining duration simulation
   const progressRatio = totalDistanceMeters > 0 ? distanceRemainingMeters / totalDistanceMeters : 0;
-  const remDurationMins = Math.round(planResult.duration_mins * progressRatio);
+  const remDurationMins = Math.round(currentPlan.duration_mins * progressRatio);
 
   // Remaining SoC decay simulation
-  const socDiff = planResult.start_soc - planResult.end_soc;
+  const socDiff = currentPlan.start_soc - currentPlan.end_soc;
   const currentEstSoC = Math.max(
-    Math.round(planResult.start_soc - socDiff * (1 - progressRatio)),
+    Math.round(currentPlan.start_soc - socDiff * (1 - progressRatio)),
     0
   );
 
   // Next maneuvers text generator
   const getNextManeuverText = () => {
+    if (isRerouting) return "Recalculating route...";
+
     if (distanceRemainingMeters < 50) {
       return "Arrive at Destination";
     }
 
-    if (planResult.recommended_stop) {
+    if (currentPlan.recommended_stop) {
       const distToCharge = getDistanceMeters(
         coords[0], coords[1],
-        planResult.recommended_stop.lat, planResult.recommended_stop.lon
+        currentPlan.recommended_stop.lat, currentPlan.recommended_stop.lon
       );
       if (distToCharge > 0 && distToCharge < 350) {
-        return `In ${Math.round(distToCharge)}m, pull over to charge at ${planResult.recommended_stop.name}`;
+        return `In ${Math.round(distToCharge)}m, pull over to charge at ${currentPlan.recommended_stop.name}`;
       }
     }
 
-    if (routeCoords.length > nextManeuverIndex + 2) {
-      const ptA = routeCoords[nextManeuverIndex];
-      const ptB = routeCoords[nextManeuverIndex + 1];
-      const ptC = routeCoords[nextManeuverIndex + 2];
+    if (currentRoute.length > nextManeuverIndex + 2) {
+      const ptA = currentRoute[nextManeuverIndex];
+      const ptB = currentRoute[nextManeuverIndex + 1];
+      const ptC = currentRoute[nextManeuverIndex + 2];
 
       const brng1 = calculateBearing(ptA[0], ptA[1], ptB[0], ptB[1]);
       const brng2 = calculateBearing(ptB[0], ptB[1], ptC[0], ptC[1]);
@@ -245,7 +302,7 @@ export const LiveNavigationScreen: React.FC<LiveNavigationScreenProps> = ({
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: routeCoords.map((c) => [c[1], c[0]]), // convert [lat, lon] to [lon, lat]
+      coordinates: currentRoute.map((c) => [c[1], c[0]]), // convert [lat, lon] to [lon, lat]
     },
   };
 
@@ -347,7 +404,7 @@ export const LiveNavigationScreen: React.FC<LiveNavigationScreenProps> = ({
             </Source>
           )}
 
-          {/* User Location Smoothed Arrow Indicator */}
+          {/* User Location Smoothed Vehicle Indicator */}
           <Marker
             latitude={coords[0]}
             longitude={coords[1]}
@@ -356,39 +413,35 @@ export const LiveNavigationScreen: React.FC<LiveNavigationScreenProps> = ({
             rotationAlignment="map"
           >
             {/* Custom Location Indicator with GPS aura pulse */}
-            <div className="relative flex items-center justify-center w-12 h-12">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-indigo-500/20 animate-ping opacity-75" />
+            <div className="relative flex items-center justify-center w-16 h-16">
+              <span className="absolute inline-flex h-12 w-12 rounded-full bg-indigo-500/20 animate-ping opacity-75" />
               
-              {bearingSource === 'none' ? (
-                // Circular dot fallback when direction is not available
-                <div className="w-6 h-6 bg-indigo-650 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white" />
-              ) : (
-                // Directional arrow with optional facing radar cone
-                <div className="relative w-8 h-8 bg-indigo-650 border-2 border-white rounded-full shadow-lg flex items-center justify-center text-white">
-                  {bearingSource === 'compass' && (
-                    // Beautiful semi-transparent radar cone pointing forward (upward relative to marker rotation)
-                    <div 
-                      className="absolute bottom-1/2 left-1/2 -translate-x-1/2 w-16 h-16 pointer-events-none origin-bottom"
-                      style={{
-                        background: 'radial-gradient(circle at bottom, rgba(99, 102, 241, 0.4) 0%, rgba(99, 102, 241, 0) 70%)',
-                        clipPath: 'polygon(50% 100%, 0 0, 100% 0)',
-                        transform: 'translate(-50%, 0)',
-                      }}
-                    />
-                  )}
-                  <svg className="w-5 h-5 -rotate-45" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
-                  </svg>
-                </div>
-              )}
+              <div className="relative w-10 h-10 bg-indigo-650 border-2 border-white rounded-full shadow-2xl flex items-center justify-center text-white transition-transform duration-300">
+                {bearingSource === 'compass' && (
+                  <div
+                    className="absolute bottom-1/2 left-1/2 -translate-x-1/2 w-20 h-20 pointer-events-none origin-bottom"
+                    style={{
+                      background: 'radial-gradient(circle at bottom, rgba(99, 102, 241, 0.3) 0%, rgba(99, 102, 241, 0) 70%)',
+                      clipPath: 'polygon(50% 100%, 0 0, 100% 0)',
+                      transform: 'translate(-50%, 0)',
+                    }}
+                  />
+                )}
+
+                {activeVehicleName?.toLowerCase().includes('ather') || activeVehicleName?.toLowerCase().includes('yadea') ? (
+                  <Bike className="w-6 h-6 drop-shadow-lg" />
+                ) : (
+                  <CarIcon className="w-6 h-6 drop-shadow-lg" />
+                )}
+              </div>
             </div>
           </Marker>
 
           {/* Plot Charging Target Stop if one exists on path */}
-          {planResult.recommended_stop && (
+          {currentPlan.recommended_stop && (
             <Marker
-              latitude={planResult.recommended_stop.lat}
-              longitude={planResult.recommended_stop.lon}
+              latitude={currentPlan.recommended_stop.lat}
+              longitude={currentPlan.recommended_stop.lon}
               anchor="bottom"
             >
               <div className="flex flex-col items-center group">
@@ -469,7 +522,7 @@ export const LiveNavigationScreen: React.FC<LiveNavigationScreenProps> = ({
       </div>
 
       {/* 4. BOTTOM BAR - NAVIGATION METRICS DASHBOARD */}
-      <div className="bg-slate-900 border-t border-slate-800/80 px-6 py-5 shrink-0 relative z-20 shadow-[0_-8px_30px_rgb(0,0,0,0.45)]">
+      <div className="bg-slate-900 border-t border-slate-800/80 px-6 py-5 pb-8 shrink-0 relative z-20 shadow-[0_-8px_30px_rgb(0,0,0,0.45)] safe-area-bottom">
 
         {/* Route Progress indicator line */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-slate-800">

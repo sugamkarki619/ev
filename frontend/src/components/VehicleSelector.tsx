@@ -2,16 +2,17 @@ import React, { useEffect, useState, useRef } from 'react';
 import { apiClient } from '../api/client';
 import { Car, Battery, Plus, AlertTriangle } from 'lucide-react';
 
-interface CatalogModel {
+export interface CatalogModel {
   model_id: string;
   brand: string;
   model_name: string;
+  vehicle_type: string;
   battery_capacity_kwh: number;
   base_drag_coefficient: number;
   supported_plugs: string[];
 }
 
-interface UserVehicle {
+export interface UserVehicle {
   user_vehicle_id: string;
   user_id: string;
   model_id: string;

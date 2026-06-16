@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { HealthCheck } from './components/HealthCheck';
 import { Auth } from './components/Auth';
 import { VehicleSelector } from './components/VehicleSelector';
+import type { UserVehicle } from './components/VehicleSelector';
 import { NavigationMap } from './components/NavigationMap';
 import { TripPlanner } from './components/TripPlanner';
 import { LiveNavigationScreen } from './components/LiveNavigationScreen';
 import { apiClient, handleLogout } from './api/client';
-import { LogOut, User as UserIcon, Cpu, Layers, ShieldCheck, Mail, Save, Wallet as WalletIcon, Coins, ShieldAlert, Award, RefreshCw, Database, LayoutDashboard, MapPin, Compass } from 'lucide-react';
+import { LogOut, User as UserIcon, Cpu, Layers, ShieldCheck, Mail, Save, ShieldAlert, Award, RefreshCw, Database, LayoutDashboard, MapPin, Compass, History, ArrowRight } from 'lucide-react';
 
 interface User {
   user_id: string;
@@ -18,24 +19,18 @@ interface User {
   is_kyc_verified: boolean;
 }
 
-interface Wallet {
-  wallet_id: string;
-  user_id: string;
-  balance_coins: number;
-  currency_code: string;
-}
 
-interface UserVehicle {
+
+interface SavedTrip {
+  trip_id: string;
   user_vehicle_id: string;
-  current_battery_percent: number;
-  battery_degradation_factor: number;
-  custom_aerodynamic_rating: number | null;
-  catalog_model: {
-    brand: string;
-    model_name: string;
-    battery_capacity_kwh: number;
-    base_drag_coefficient: number;
-  } | null;
+  start_address: string;
+  end_address: string;
+  total_distance_km: number;
+  total_duration_mins: number;
+  estimated_arrival_time: string;
+  created_at: string;
+  waypoints: any[];
 }
 
 function App() {
@@ -43,7 +38,7 @@ function App() {
     !!localStorage.getItem('access_token')
   );
   const [user, setUser] = useState<User | null>(null);
-  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [savedTrips, setSavedTrips] = useState<SavedTrip[]>([]);
   const [activeVehicle, setActiveVehicle] = useState<UserVehicle | null>(null);
   const [currentPage, setCurrentPage] = useState<'dashboard' | 'station-search' | 'trip-planner' | 'live-navigation'>('dashboard');
   const [activeNavPlan, setActiveNavPlan] = useState<any | null>(null);
@@ -51,7 +46,7 @@ function App() {
   const [navigatedFromPage, setNavigatedFromPage] = useState<'station-search' | 'trip-planner'>('trip-planner');
 
   const [loadingUser, setLoadingUser] = useState(false);
-  const [loadingWallet, setLoadingWallet] = useState(false);
+  const [loadingTrips, setLoadingTrips] = useState(false);
 
   // Database Seeding State
   const [seeding, setSeeding] = useState(false);
@@ -85,16 +80,17 @@ function App() {
     }
   };
 
-  const fetchUserWallet = async () => {
+
+  const fetchSavedTrips = async () => {
     if (!isAuthenticated) return;
-    setLoadingWallet(true);
+    setLoadingTrips(true);
     try {
-      const response = await apiClient.get('/wallets/me');
-      setWallet(response.data);
+      const response = await apiClient.get('/trips');
+      setSavedTrips(response.data);
     } catch (err) {
-      console.error("Failed to load wallet data", err);
+      console.error("Failed to load saved trips", err);
     } finally {
-      setLoadingWallet(false);
+      setLoadingTrips(false);
     }
   };
 
@@ -131,7 +127,6 @@ function App() {
       setSeedStatus(response.data.message);
       // Reload states
       await fetchUserProfile();
-      await fetchUserWallet();
     } catch (err: any) {
       setSeedStatus("Seeding failed: " + (err.response?.data?.detail || err.message));
     } finally {
@@ -142,10 +137,9 @@ function App() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserProfile();
-      fetchUserWallet();
+      fetchSavedTrips();
     } else {
       setUser(null);
-      setWallet(null);
       setActiveVehicle(null);
     }
   }, [isAuthenticated]);
@@ -154,7 +148,6 @@ function App() {
     const handleAuthLogout = () => {
       setIsAuthenticated(false);
       setUser(null);
-      setWallet(null);
       setActiveVehicle(null);
     };
     window.addEventListener('auth_logout', handleAuthLogout);
@@ -165,7 +158,6 @@ function App() {
     handleLogout();
     setIsAuthenticated(false);
     setUser(null);
-    setWallet(null);
     setActiveVehicle(null);
   };
 
@@ -342,19 +334,19 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="flex gap-4 mt-8 flex-wrap">
+                  <div className="flex gap-3 mt-8 flex-wrap">
                     <button
                       onClick={() => setCurrentPage('trip-planner')}
-                      className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-sm font-black transition-all shadow-lg shadow-indigo-900/20 flex items-center gap-2 group"
+                      className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-black transition-all shadow-lg shadow-indigo-900/20 flex items-center gap-2 group cursor-pointer active:scale-95"
                     >
-                      <Compass className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+                      <Compass className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                       Plan New Trip
                     </button>
                     <button
                       onClick={() => setCurrentPage('station-search')}
-                      className="px-6 py-3 bg-slate-800 hover:bg-slate-750 text-white rounded-2xl text-sm font-black transition-all flex items-center gap-2 border border-slate-700"
+                      className="px-5 py-2.5 bg-slate-800 hover:bg-slate-750 text-white rounded-xl text-xs font-black transition-all flex items-center gap-2 border border-slate-700 cursor-pointer active:scale-95"
                     >
-                      <MapPin className="w-5 h-5" />
+                      <MapPin className="w-4 h-4" />
                       Find Stations
                     </button>
                   </div>
@@ -364,41 +356,60 @@ function App() {
               {/* Main Column Priority: Vehicle Management */}
               <VehicleSelector onVehicleSelected={setActiveVehicle} />
 
-              {/* Horizontal Stats/Wallet Row */}
+              {/* Horizontal Stats/Saved Trips Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Refined Wallet Card */}
-                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
-                  <div className="absolute -right-4 -bottom-4 opacity-5 text-indigo-400 group-hover:scale-110 transition-transform duration-500">
-                    <WalletIcon className="w-32 h-32" />
+                {/* Recent Saved Trips Panel */}
+                <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group flex flex-col">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+                      <History className="w-4 h-4 text-indigo-500" />
+                      Recent Saved Trips
+                    </h2>
+                    <button
+                      onClick={fetchSavedTrips}
+                      className="p-1.5 bg-slate-800/50 hover:bg-slate-800 rounded-lg text-slate-500 hover:text-indigo-400 transition-all cursor-pointer"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${loadingTrips ? 'animate-spin' : ''}`} />
+                    </button>
                   </div>
 
-                  <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                    <Coins className="w-4 h-4 text-indigo-500" />
-                    Wallet Balance
-                  </h2>
-
-                  {loadingWallet ? (
-                    <div className="py-4 animate-pulse bg-slate-800/50 rounded-xl h-24" />
-                  ) : wallet ? (
-                    <div className="flex flex-col justify-between h-full min-h-[120px]">
-                      <div>
-                        <div className="text-5xl font-black text-white tracking-tighter flex items-baseline gap-2">
-                          {wallet.balance_coins.toFixed(2)}
-                          <span className="text-lg text-indigo-500 font-black uppercase">{wallet.currency_code}</span>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-2 font-medium">Credits ready for fast-charging</p>
-                      </div>
-
-                      <div className="flex gap-2 mt-6">
-                        <button className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer">
-                          Add Funds
-                        </button>
-                        <button className="p-2 bg-slate-800 border border-slate-700 hover:bg-slate-750 rounded-xl transition-all text-slate-300 cursor-pointer">
-                          <RefreshCw className="w-4 h-4" onClick={fetchUserWallet} />
-                        </button>
-                      </div>
+                  {loadingTrips ? (
+                    <div className="space-y-3">
+                      {[1, 2].map(i => <div key={i} className="h-16 bg-slate-800/40 rounded-2xl animate-pulse" />)}
                     </div>
-                  ) : null}
+                  ) : savedTrips.length === 0 ? (
+                    <div className="flex-1 flex flex-col items-center justify-center py-8 text-center bg-slate-950/30 rounded-2xl border border-dashed border-slate-800/50">
+                      <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center mb-3">
+                        <MapPin className="w-5 h-5 text-slate-700" />
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">No trips saved yet</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-[180px] overflow-y-auto no-scrollbar">
+                      {savedTrips.slice(0, 3).map((trip) => (
+                        <div key={trip.trip_id} className="bg-slate-950/60 border border-slate-800/50 p-3.5 rounded-2xl flex items-center justify-between group/trip hover:border-indigo-500/30 transition-all">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 text-xs font-bold text-white mb-1">
+                              <span className="truncate max-w-[100px]">{trip.start_address.split(',')[0]}</span>
+                              <ArrowRight className="w-3 h-3 text-indigo-500 shrink-0" />
+                              <span className="truncate max-w-[100px]">{trip.end_address.split(',')[0]}</span>
+                            </div>
+                            <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                              <span>{trip.total_distance_km.toFixed(1)} km</span>
+                              <span className="w-1 h-1 bg-slate-700 rounded-full" />
+                              <span>{trip.total_duration_mins} mins</span>
+                            </div>
+                          </div>
+                          <button
+                            className="ml-3 p-2 bg-indigo-600/10 hover:bg-indigo-600 text-indigo-500 hover:text-white rounded-xl transition-all cursor-pointer shadow-lg active:scale-95"
+                            onClick={() => setCurrentPage('trip-planner')}
+                          >
+                            <Compass className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Quick Info / Tips */}
@@ -606,14 +617,16 @@ function App() {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-md border-t border-slate-900 z-50 py-2 px-6 flex justify-around items-center">
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 bg-slate-950/90 backdrop-blur-md border-t border-slate-900 z-50 py-3 px-6 flex justify-around items-center safe-area-bottom ${
+        currentPage === 'live-navigation' ? 'hidden' : 'flex'
+      }`}>
         <button
           onClick={() => setCurrentPage('dashboard')}
           className={`flex flex-col items-center gap-1 transition-all cursor-pointer ${currentPage === 'dashboard' ? 'text-indigo-400' : 'text-slate-500'
             }`}
         >
           <LayoutDashboard className="w-5 h-5" />
-          <span className="text-[10px] font-bold">Dashboard</span>
+          <span className="text-[10px] font-bold">Home</span>
         </button>
         <button
           onClick={() => setCurrentPage('station-search')}
@@ -621,7 +634,7 @@ function App() {
             }`}
         >
           <MapPin className="w-5 h-5" />
-          <span className="text-[10px] font-bold">Station Search</span>
+          <span className="text-[10px] font-bold">Stations</span>
         </button>
         <button
           onClick={() => setCurrentPage('trip-planner')}
@@ -629,7 +642,7 @@ function App() {
             }`}
         >
           <Compass className="w-5 h-5" />
-          <span className="text-[10px] font-bold">Trip Planner</span>
+          <span className="text-[10px] font-bold">Planner</span>
         </button>
       </div>
     </div>

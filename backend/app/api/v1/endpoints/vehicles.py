@@ -14,6 +14,7 @@ class VehicleCatalogOut(BaseModel):
     model_id: Any
     brand: str
     model_name: str
+    vehicle_type: str
     battery_capacity_kwh: float
     base_drag_coefficient: float
     supported_plugs: List[str]
@@ -63,6 +64,7 @@ async def get_vehicle_catalog(db: AsyncSession = Depends(get_db)) -> Any:
                 model_id=item.model_id,
                 brand=item.brand,
                 model_name=item.model_name,
+                vehicle_type=item.vehicle_type.value if hasattr(item.vehicle_type, "value") else str(item.vehicle_type),
                 battery_capacity_kwh=float(item.battery_capacity_kwh),
                 base_drag_coefficient=float(item.base_drag_coefficient),
                 supported_plugs=plugs
@@ -93,6 +95,7 @@ async def get_my_vehicles(
                 model_id=cat.model_id,
                 brand=cat.brand,
                 model_name=cat.model_name,
+                vehicle_type=cat.vehicle_type.value if hasattr(cat.vehicle_type, "value") else str(cat.vehicle_type),
                 battery_capacity_kwh=float(cat.battery_capacity_kwh),
                 base_drag_coefficient=float(cat.base_drag_coefficient),
                 supported_plugs=[p.value if hasattr(p, "value") else str(p) for p in cat.supported_plugs]
@@ -155,6 +158,7 @@ async def create_user_vehicle(
         model_id=cat.model_id,
         brand=cat.brand,
         model_name=cat.model_name,
+        vehicle_type=cat.vehicle_type.value if hasattr(cat.vehicle_type, "value") else str(cat.vehicle_type),
         battery_capacity_kwh=float(cat.battery_capacity_kwh),
         base_drag_coefficient=float(cat.base_drag_coefficient),
         supported_plugs=[p.value if hasattr(p, "value") else str(p) for p in cat.supported_plugs]
@@ -223,6 +227,7 @@ async def update_user_vehicle(
             model_id=cat.model_id,
             brand=cat.brand,
             model_name=cat.model_name,
+            vehicle_type=cat.vehicle_type.value if hasattr(cat.vehicle_type, "value") else str(cat.vehicle_type),
             battery_capacity_kwh=float(cat.battery_capacity_kwh),
             base_drag_coefficient=float(cat.base_drag_coefficient),
             supported_plugs=[p.value if hasattr(p, "value") else str(p) for p in cat.supported_plugs]

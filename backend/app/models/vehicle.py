@@ -10,12 +10,17 @@ class PlugType(str, enum.Enum):
     Tesla_Supercharger = "Tesla_Supercharger"
     GB_T = "GB_T"
 
+class VehicleType(str, enum.Enum):
+    FOUR_WHEELER = "four_wheeler"
+    TWO_WHEELER = "two_wheeler"
+
 class VehicleCatalog(Base):
     __tablename__ = "vehicle_catalog"
 
     model_id = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
     brand = Column(String(100), nullable=False)
     model_name = Column(String(100), nullable=False)
+    vehicle_type = Column(Enum(VehicleType, name="vehicle_type"), nullable=False, default=VehicleType.FOUR_WHEELER, server_default="four_wheeler")
     battery_capacity_kwh = Column(Numeric(6, 2), nullable=False)
     base_drag_coefficient = Column(Numeric(4, 3), nullable=False)
     supported_plugs = Column(ARRAY(Enum(PlugType, name="plug_type")), nullable=False)

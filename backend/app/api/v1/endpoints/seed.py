@@ -7,7 +7,7 @@ from app.core.security import get_password_hash
 # Import all models
 from app.models.user import User, UserRole
 from app.models.wallet import Wallet
-from app.models.vehicle import VehicleCatalog, PlugType, UserVehicle
+from app.models.vehicle import VehicleCatalog, PlugType, UserVehicle, VehicleType
 from app.models.station import ChargingStation, StationType, ChargingSpot, SlotStatus, StationAccessProtocol
 from app.models.commerce import Restaurant, Menu, MenuItem
 from app.models.community import LocalAmenity
@@ -44,13 +44,15 @@ async def run_seeding(db: AsyncSession = Depends(get_db)):
 
         # 2. Seed Vehicle Catalog (Dominant EVs in Nepal market)
         vehicles = [
-            VehicleCatalog(brand="BYD", model_name="Atto 3 Long Range", battery_capacity_kwh=60.48, base_drag_coefficient=0.290, supported_plugs=[PlugType.CCS2]),
-            VehicleCatalog(brand="BYD", model_name="Dolphin", battery_capacity_kwh=44.90, base_drag_coefficient=0.300, supported_plugs=[PlugType.CCS2]),
-            VehicleCatalog(brand="Tata", model_name="Nexon EV Max", battery_capacity_kwh=40.50, base_drag_coefficient=0.320, supported_plugs=[PlugType.CCS2]),
-            VehicleCatalog(brand="Tata", model_name="Punch EV", battery_capacity_kwh=35.00, base_drag_coefficient=0.315, supported_plugs=[PlugType.CCS2]),
-            VehicleCatalog(brand="MG", model_name="ZS EV Deluxe", battery_capacity_kwh=51.00, base_drag_coefficient=0.290, supported_plugs=[PlugType.CCS2]),
-            VehicleCatalog(brand="Hyundai", model_name="Ioniq 5 Standard", battery_capacity_kwh=58.00, base_drag_coefficient=0.288, supported_plugs=[PlugType.CCS2]),
-            VehicleCatalog(brand="Deepal", model_name="S7 EV", battery_capacity_kwh=66.80, base_drag_coefficient=0.258, supported_plugs=[PlugType.CCS2])
+            VehicleCatalog(brand="BYD", model_name="Atto 3 Long Range", vehicle_type=VehicleType.FOUR_WHEELER, battery_capacity_kwh=60.48, base_drag_coefficient=0.290, supported_plugs=[PlugType.CCS2]),
+            VehicleCatalog(brand="BYD", model_name="Dolphin", vehicle_type=VehicleType.FOUR_WHEELER, battery_capacity_kwh=44.90, base_drag_coefficient=0.300, supported_plugs=[PlugType.CCS2]),
+            VehicleCatalog(brand="Tata", model_name="Nexon EV Max", vehicle_type=VehicleType.FOUR_WHEELER, battery_capacity_kwh=40.50, base_drag_coefficient=0.320, supported_plugs=[PlugType.CCS2]),
+            VehicleCatalog(brand="Tata", model_name="Punch EV", vehicle_type=VehicleType.FOUR_WHEELER, battery_capacity_kwh=35.00, base_drag_coefficient=0.315, supported_plugs=[PlugType.CCS2]),
+            VehicleCatalog(brand="MG", model_name="ZS EV Deluxe", vehicle_type=VehicleType.FOUR_WHEELER, battery_capacity_kwh=51.00, base_drag_coefficient=0.290, supported_plugs=[PlugType.CCS2]),
+            VehicleCatalog(brand="Hyundai", model_name="Ioniq 5 Standard", vehicle_type=VehicleType.FOUR_WHEELER, battery_capacity_kwh=58.00, base_drag_coefficient=0.288, supported_plugs=[PlugType.CCS2]),
+            VehicleCatalog(brand="Deepal", model_name="S7 EV", vehicle_type=VehicleType.FOUR_WHEELER, battery_capacity_kwh=66.80, base_drag_coefficient=0.258, supported_plugs=[PlugType.CCS2]),
+            VehicleCatalog(brand="Ather", model_name="450X Gen 3", vehicle_type=VehicleType.TWO_WHEELER, battery_capacity_kwh=3.70, base_drag_coefficient=0.600, supported_plugs=[PlugType.Type2]),
+            VehicleCatalog(brand="Yadea", model_name="G5", vehicle_type=VehicleType.TWO_WHEELER, battery_capacity_kwh=2.40, base_drag_coefficient=0.650, supported_plugs=[PlugType.Type2])
         ]
         db.add_all(vehicles)
         await db.commit()

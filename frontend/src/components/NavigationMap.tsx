@@ -3,6 +3,7 @@ import { apiClient } from '../api/client';
 import axios from 'axios';
 import L from 'leaflet';
 import { Compass, ShieldAlert, MapPin, Locate, Search, X } from 'lucide-react';
+import { decodePolyline6 } from '../hooks/useSmoothGPS';
 
 interface Station {
   station_id: string;
@@ -35,35 +36,6 @@ interface NavigationMapProps {
   onStartNavigation?: (plan: any, routeCoords: [number, number][]) => void;
 }
 
-// Helper: Decode Valhalla's polyline6 format
-function decodePolyline6(str: string): [number, number][] {
-  let index = 0, lat = 0, lng = 0, coordinates: [number, number][] = [];
-  const factor = 1e6;
-
-  while (index < str.length) {
-    let byte, shift = 0, result = 0;
-    do {
-      byte = str.charCodeAt(index++) - 63;
-      result |= (byte & 0x1f) << shift;
-      shift += 5;
-    } while (byte >= 0x20);
-    let dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
-    lat += dlat;
-
-    shift = 0;
-    result = 0;
-    do {
-      byte = str.charCodeAt(index++) - 63;
-      result |= (byte & 0x1f) << shift;
-      shift += 5;
-    } while (byte >= 0x20);
-    let dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
-    lng += dlng;
-
-    coordinates.push([lat / factor, lng / factor]);
-  }
-  return coordinates;
-}
 
 interface OsmPlace {
   name: string;
@@ -659,7 +631,7 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
         {routeSummary && (
           <div 
             className="md:hidden absolute left-0 right-0 px-4 z-45 transition-all duration-300"
-            style={{ bottom: isSheetExpanded ? 'calc(65vh + 80px)' : '294px' }}
+            style={{ bottom: isSheetExpanded ? 'calc(65vh + 20px)' : '230px' }}
           >
             <button 
               onClick={() => {
@@ -676,10 +648,10 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
                   onStartNavigation(plan, routeCoords);
                 }
               }}
-              className="w-full bg-indigo-600 text-white h-16 rounded-full flex items-center justify-center gap-3 shadow-[0_0_25px_rgba(234,88,12,0.5)] active:scale-95 transition-all border-2 border-indigo-400/20"
+              className="w-full bg-indigo-600 text-white h-14 rounded-full flex items-center justify-center gap-3 shadow-[0_0_25px_rgba(234,88,12,0.5)] active:scale-95 transition-all border-2 border-indigo-400/20"
             >
-              <Compass className="w-6 h-6 animate-pulse" />
-              <span className="text-sm font-black uppercase tracking-widest">Start Live Navigation</span>
+              <Compass className="w-5 h-5 animate-pulse" />
+              <span className="text-xs font-black uppercase tracking-widest">Start Live Navigation</span>
             </button>
           </div>
         )}
@@ -944,7 +916,7 @@ export const NavigationMap: React.FC<NavigationMapProps> = ({ activeVehicle, onS
 
       {/* Expandable Bottom Sheet (Mobile only) */}
       <div 
-        className="md:hidden absolute bottom-16 left-0 right-0 bg-slate-900 border-t border-slate-800 rounded-t-[2rem] z-40 flex flex-col transition-all duration-350 shadow-2xl"
+        className="md:hidden absolute bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800 rounded-t-[2rem] z-40 flex flex-col transition-all duration-350 shadow-2xl pb-20"
         style={{ height: isSheetExpanded ? '65vh' : '210px' }}
       >
         {/* Handle Bar with Drag/Swipe support */}
